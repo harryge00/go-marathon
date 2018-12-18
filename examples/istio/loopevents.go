@@ -18,10 +18,8 @@ package main
 
 import (
 	"flag"
+	"github.com/gambol99/go-marathon"
 	"log"
-	"time"
-
-	marathon "github.com/gambol99/go-marathon"
 )
 
 var marathonURL string
@@ -40,6 +38,14 @@ func assert(err error) {
 
 func main() {
 	flag.Parse()
+	stop := make(chan struct{})
+	run(stop)
+}
+// Workflow:
+// 1. deployment_info -> 2.
+//
+//
+func run(stop <-chan struct{}) {
 	config := marathon.NewDefaultConfig()
 	config.URL = marathonURL
 	config.EventsTransport = marathon.EventsTransportSSE
@@ -49,22 +55,28 @@ func main() {
 	assert(err)
 
 	// Register for events
+	apievents, err := client.AddEventsListener(marathon.EventIDAPIRequest)
+	assert(err)
 	events, err := client.AddEventsListener(marathon.EventIDApplications)
 	assert(err)
 	deployments, err := client.AddEventsListener(marathon.EventIDDeploymentStepSuccess)
 	assert(err)
 
-	// Listen for x seconds and then split
-	timer := time.After(time.Duration(timeout) * time.Second)
 	done := false
 	for {
 		if done {
 			break
 		}
 		select {
-		case <-timer:
+		case <-stop:
 			log.Printf("Exiting the loop")
 			done = true
+		case event:= <- apievents:
+			log.Printf("Received api-post-event: %v", event)
+			var app *marathon.EventAPIRequest
+			app = event.Event.(*marathon.EventAPIRequest)
+			log.Printf("labels: %v", *app.AppDefinition.Labels)
+			log.Printf("port: %v", app.AppDefinition.PortDefinitions)
 		case event := <-events:
 			log.Printf("Received application event: %s", event)
 		case event := <-deployments:
@@ -77,5 +89,6 @@ func main() {
 
 	log.Printf("Removing our subscription")
 	client.RemoveEventsListener(events)
+	client.RemoveEventsListener(apievents)
 	client.RemoveEventsListener(deployments)
 }

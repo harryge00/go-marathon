@@ -25,6 +25,7 @@ import (
 type Group struct {
 	ID           string         `json:"id"`
 	Apps         []*Application `json:"apps"`
+	Pods         []*Pod 		`json:"pods,omitempty"`
 	Dependencies []string       `json:"dependencies"`
 	Groups       []*Group       `json:"groups"`
 }

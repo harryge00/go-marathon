@@ -53,7 +53,8 @@ type StepActions struct {
 	Actions []struct {
 		Action string `json:"action"` // 1.1.2 and after
 		Type   string `json:"type"`   // 1.1.1 and before
-		App    string `json:"app"`
+		App    string `json:"app,omitempty"`
+		Pod    string `json:"pod,omitempty"`
 	}
 }
 

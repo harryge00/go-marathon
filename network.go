@@ -34,11 +34,12 @@ type PodNetwork struct {
 
 // PodEndpoint describes an endpoint for a pod's container
 type PodEndpoint struct {
-	Name          string            `json:"name,omitempty"`
-	ContainerPort int               `json:"containerPort,omitempty"`
-	HostPort      int               `json:"hostPort,omitempty"`
-	Protocol      []string          `json:"protocol,omitempty"`
-	Labels        map[string]string `json:"labels,omitempty"`
+	Name              string            `json:"name,omitempty"`
+	ContainerPort     int               `json:"containerPort,omitempty"`
+	HostPort          int               `json:"hostPort,omitempty"`
+	AllocatedHostPort int               `json:"allocatedHostPort,omitempty"`
+	Protocol          []string          `json:"protocol,omitempty"`
+	Labels            map[string]string `json:"labels,omitempty"`
 }
 
 // NewPodNetwork creates an empty PodNetwork
